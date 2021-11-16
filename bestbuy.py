@@ -1,6 +1,7 @@
 import bs4
 import sys
 import time
+import json
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
 from selenium import webdriver
@@ -11,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.chrome.service import Service
 
 # ---------------------------------------------Please Read--------------------------------------------------------------
 
@@ -43,35 +45,51 @@ from webdriver_manager.firefox import GeckoDriverManager
 
 # -----------------------------------------------Steps To Complete------------------------------------------------------
 
-# Test Link (Ryzen 5800x) - The Ryzen 5800x is always available and still uses Bestbuy's Queue System.
-# https://www.bestbuy.com/site/amd-ryzen-7-5800x-4th-gen-8-core-16-threads-unlocked-desktop-processor-without-cooler/6439000.p?skuId=6439000
-test_mode = True  # Set test_mode to True when testing bot checkout process, and set it to False when your done testing.
-headless_mode = False  # Set False for testing. If True, it will hide Firefox in background for faster checkout speed.
-webpage_refresh_timer = 3  # Default 3 seconds. If slow internet and the page isn't fully loading, increase this.
+try:
+    config_file = open('./config.json')
+    config = json.loads(config_file.read())
+except (FileNotFoundError, json.JSONDecodeError) as e:
+    print(f'invalid or nonexistent config file: {e}')
+    raise SystemExit
 
-# 1. Product URL
-url = 'https://www.bestbuy.com/site/amd-ryzen-7-5800x-4th-gen-8-core-16-threads-unlocked-desktop-processor-without-cooler/6439000.p?skuId=6439000'
+test_mode = config['testMode']
+headless_mode = config['headlessMode']
+webpage_refresh_timer = config['webpageRefreshTimer']
+browser_type = config['browserType']
+url = config['url']
+cvv = config['cvv']
+toNumber = config['twToNumber']
+fromNumber = config['twFromNumber']
+accountSid = config['twAccountSid']
+authToken = config['twAuthToken']
+chrome_executable_path = config['chromeExecutablePath']
+firefox_profile_path = config['firefoxProfilePath']
 
 
-# 2. Firefox Profile
-def create_driver():
+client = Client(accountSid, authToken)
+
+def create_driver_firefox():
     """Creating firefox driver to control webpage. Please add your firefox profile down below."""
     options = Options()
     options.headless = headless_mode
-    profile = webdriver.FirefoxProfile(r'C:\Users\Trebor\AppData\Roaming\Mozilla\Firefox\Profiles\t6inpqro.Robert-1613116705360')
+    profile = webdriver.FirefoxProfile(firefox_profile_path)
     web_driver = webdriver.Firefox(profile, options=options, executable_path=GeckoDriverManager().install())
     return web_driver
 
+def create_driver_chrome():
+    options = Options()
+    options.headless = headless_mode
+    serv = Service('./chromedriver.exe')
+    driver = webdriver.Chrome(service=serv, options=options)
+    return driver
 
-# 3. credit card CVV Number
-CVV = '123'  # You can enter your CVV number here in quotes.
-
-# 4. Twilio Account
-toNumber = 'Your_Phone_Number'
-fromNumber = 'Twilio_Phone_Number'
-accountSid = 'Twilio_SSID'
-authToken = 'Twilio_AuthToken'
-client = Client(accountSid, authToken)
+def create_driver():
+    if browser_type == 'chrome':
+        return create_driver_chrome()
+    elif browser_type == 'firefox':
+        return create_driver_firefox()
+    print(f'invalid browser type supplied {browser_type}')
+    raise SystemExit
 
 # ----------------------------------------------------------------------------------------------------------------------
 
