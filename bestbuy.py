@@ -261,6 +261,7 @@ def searching_for_product(driver):
                     # comment the one down below. vv
                     if not test_mode:
                         print("Product Checkout Completed.")
+                        time.sleep(1)
                         driver_click(driver, 'xpath', 'btn btn-lg btn-block btn-primary button__fast-track')
                     if test_mode:
                         print("Test Mode - Product Checkout Completed.")
