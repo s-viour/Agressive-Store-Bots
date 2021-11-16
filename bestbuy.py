@@ -64,6 +64,7 @@ fromNumber = config['twFromNumber']
 accountSid = config['twAccountSid']
 authToken = config['twAuthToken']
 chrome_executable_path = config['chromeExecutablePath']
+chrome_data_path = config['chromeDataPath']
 firefox_profile_path = config['firefoxProfilePath']
 
 
@@ -81,7 +82,9 @@ def create_driver_chrome():
     options = ChromeOptions()
     options.binary_location = chrome_executable_path
     print(f'chrome executable path is {chrome_executable_path}')
+    print(f'chrome data path is {chrome_data_path}')
     options.headless = headless_mode
+    options.add_argument(f'user-data-dir={chrome_data_path}')
     serv = Service(executable_path='chromedriver.exe')
     driver = webdriver.Chrome(service=serv, options=options)
     return driver
@@ -157,7 +160,8 @@ def searching_for_product(driver):
 
         try:
             add_to_cart_button = soup.find('button', {
-                'class': 'btn btn-primary btn-lg btn-block btn-leading-ficon add-to-cart-button'})
+                'class': 'add-to-cart-button'
+            })
 
             if add_to_cart_button:
                 print(f'Add To Cart Button Found!')
