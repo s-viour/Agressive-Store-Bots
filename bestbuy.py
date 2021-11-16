@@ -10,7 +10,8 @@ from selenium.common.exceptions import NoSuchElementException, ElementNotInterac
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.chrome.service import Service
 
@@ -70,16 +71,18 @@ client = Client(accountSid, authToken)
 
 def create_driver_firefox():
     """Creating firefox driver to control webpage. Please add your firefox profile down below."""
-    options = Options()
+    options = FirefoxOptions()
     options.headless = headless_mode
     profile = webdriver.FirefoxProfile(firefox_profile_path)
     web_driver = webdriver.Firefox(profile, options=options, executable_path=GeckoDriverManager().install())
     return web_driver
 
 def create_driver_chrome():
-    options = Options()
+    options = ChromeOptions()
+    options.binary_location = chrome_executable_path
+    print(f'chrome executable path is {chrome_executable_path}')
     options.headless = headless_mode
-    serv = Service('./chromedriver.exe')
+    serv = Service(executable_path='chromedriver.exe')
     driver = webdriver.Chrome(service=serv, options=options)
     return driver
 
@@ -244,7 +247,7 @@ def searching_for_product(driver):
                     time.sleep(1)
                     security_code = driver.find_element_by_id("credit-card-cvv")
                     time.sleep(1)
-                    security_code.send_keys(CVV)
+                    security_code.send_keys(cvv)
                 except (NoSuchElementException, TimeoutException):
                     pass
 
