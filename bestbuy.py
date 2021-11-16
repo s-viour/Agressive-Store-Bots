@@ -247,9 +247,9 @@ def searching_for_product(driver):
                 # Trying CVV
                 try:
                     print("\nTrying CVV Number.\n")
-                    wait2.until(EC.presence_of_element_located((By.ID, "credit-card-cvv")))
+                    wait2.until(EC.presence_of_element_located((By.ID, "cvv")))
                     time.sleep(1)
-                    security_code = driver.find_element_by_id("credit-card-cvv")
+                    security_code = driver.find_element_by_id("cvv")
                     time.sleep(1)
                     security_code.send_keys(cvv)
                 except (NoSuchElementException, TimeoutException):
